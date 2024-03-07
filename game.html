@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the missing number</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+			font-size: 32px;
+        }
+		
+        table {
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 3px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            border: 3px solid black;
+        }
+		
+		#circle {
+			height: 65px;
+			width: 65px;
+			background-color: gray;
+			border-radius: 50%;
+			display: inline-block;
+		}
+		
+		#grid {
+			margin: 50px;
+			font-size: 40px;
+		}
+		
+		#history {
+			margin-left: 200px;
+		}
+		
+		#bigText {
+			font-size: 70px;
+		}
+    </style>
+</head>
+<body>
+<script>
+	let allRoundsNum = 3;
+
+	let missingNumber = 0;
+	let correctNum = 0;
+	let wrongNum = 0;
+	let roundNum = 0;
+	
+	let timerValue = 0;
+	let timerInterval;
+	let timerStarted = false;
+	
+    function generateRandomArray() {
+        let array = Array.from({ length: 9 }, (_, index) => index + 1);
+		let randomNum = Math.floor(Math.random() * 9);
+		array[randomNum]="";
+		missingNumber = randomNum + 1;
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function fillGrid() {
+        let grid = document.getElementById('grid');
+		grid.innerHTML = "";
+        let numbers = generateRandomArray();
+
+        for (let i = 0; i < 3; i++) {
+            let row = grid.insertRow(i);
+
+            for (let j = 0; j < 3; j++) {
+                let cell = row.insertCell(j);
+                cell.textContent = numbers[i * 3 + j];
+            }
+        }
+    }
+	
+    function fillGridButEmpty() {
+        let grid = document.getElementById('grid');
+		grid.innerHTML = "";
+
+        for (let i = 0; i < 3; i++) {
+            let row = grid.insertRow(i);
+
+            for (let j = 0; j < 3; j++) {
+                let cell = row.insertCell(j);
+                cell.textContent = "";
+            }
+        }
+		
+		missingNumber = 0;
+    }
+	
+	function handleKeyDown(event) {
+		console.log(missingNumber);
+        const isNumberKey = event.key >= '0' && event.key <= '9';
+		
+        if (isNumberKey && missingNumber != 0) {
+            if(parseInt(event.key) == missingNumber) {
+				correctNum += 1;
+				document.getElementById('correct').innerHTML = "Correct: " + correctNum.toString();
+				document.getElementById('circle').style.backgroundColor = "#6f6";
+				fillGrid();
+				if(roundNum == allRoundsNum) {
+					console.log(timerValue);
+					
+					let time1 = document.getElementById('time1');
+					let time2 = document.getElementById('time2');
+					let time3 = document.getElementById('time3');
+					time3.innerHTML = time2.innerHTML;
+					time2.innerHTML = time1.innerHTML;
+					time1.innerHTML = timerValue.toString();
+					
+					resetThings();
+					document.getElementById('bigText').innerHTML = "YOU WIN! TIME: " + time1.innerHTML;
+					document.getElementById('circle').style.backgroundColor = "#6f6";
+				}
+				else if(roundNum != allRoundsNum){
+					roundNum += 1;
+					document.getElementById('roundNum').innerHTML = "Round: " + roundNum.toString() + "/3";
+				}
+			}
+			else{
+				console.log('Wrong:', event.key);
+				wrongNum += 1;
+				document.getElementById('incorrect').innerHTML = "Incorrect: " + wrongNum.toString();
+				
+				resetThings();
+				document.getElementById('bigText').innerHTML = "YOU LOST";
+				document.getElementById('circle').style.backgroundColor = "red";
+			}
+        }
+		
+		else if (event.key == '1' && missingNumber == 0) {
+			resetThings()
+			fillGrid();
+			startTimer();
+			roundNum = 1;
+			document.getElementById('roundNum').innerHTML = "Round: " + roundNum.toString() + "/3";
+		}
+		
+		else if (event.key == ' ') {
+			resetThings();
+		}
+    }
+	
+	function resetThings() {
+		fillGridButEmpty();
+		document.getElementById('circle').style.backgroundColor = "gray";
+		roundNum = 0;
+		document.getElementById('roundNum').innerHTML = "Round: None";
+		missingNumber = 0;
+		document.getElementById('bigText').innerHTML = "";
+		
+		clearInterval(timerInterval);
+		timerStarted = false;
+		timerValue = '0.0';
+		updateTimer();
+	}
+	
+  function updateTimer() {
+    const timerDisplay = document.getElementById('timer');
+    timerDisplay.textContent = "Timer: " + timerValue;
+	console.log(missingNumber);
+  }
+
+  function startTimer() {
+    timerStarted = true;
+	start = Date.now();
+    timerInterval = setInterval(function() {
+      timerValue = (Math.floor((Date.now() - start)/100)).toString();
+	  timerValue = timerValue.slice(0, timerValue.length - 1) + "." + timerValue.slice(timerValue.length - 1, timerValue.length);
+	  if(timerValue.length == 2) timerValue = '0' + timerValue;
+      updateTimer();
+    }, 10);
+  }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    document.addEventListener('DOMContentLoaded', fillGridButEmpty);
+</script>
+<div>
+	<p id="bigText"></p>
+	<table id="grid"></table>
+	<span id="circle"></span>
+</div>
+<div>
+	<p id="correct">Correct: 0</p>
+	<p id="incorrect">Incorrect: 0</p>
+	<p id="timer">Timer: 0.0</p>
+	<p id="roundNum">Round: None</p>
+</div>
+<div id="history">
+	<p>Previous times</p>
+	<table>
+		<tr>
+		<td>1</td>
+		<td id="time1"></td>
+		</tr>
+		<tr>
+		<td>2</td>
+		<td id="time2"></td>
+		</tr>
+		<tr>
+		<td>3</td>
+		<td id="time3"></td>
+		</tr>
+	</table>
+</div>
+</body>
+</html>

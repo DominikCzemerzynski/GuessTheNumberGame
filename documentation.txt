@@ -1,0 +1,13 @@
+How to play:
+Press '1' key on keyboard to start a game.
+Press 'SPACE' to reset game.
+Guess the missing number by pressing it on keyboard.
+Player wins after guessing correctly 3 numbers consecutively.
+
+Winning the game:
+After player wins the time will be shown on top part of the screen. 
+The time will also be saved to the table that shows last 3 times.
+
+More information:
+The previous 3 times are shown on the right part of the screen and sorted from newest to oldest.
+The circle turns green when number has been guessed correctly and red when incorrectly.
